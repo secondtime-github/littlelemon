@@ -2,4 +2,4 @@
 
 ![](wireframe.jpg)
 
-![](Prototype.png)
+![](prototype.jpg)
