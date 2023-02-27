@@ -8,7 +8,7 @@
 import Foundation
 
 enum Category: String, CaseIterable {
-    case starter = "Starts"
+    case starter = "Starters"
     case main = "Mains"
     case dessert = "Desserts"
     case drink = "Drinks"
