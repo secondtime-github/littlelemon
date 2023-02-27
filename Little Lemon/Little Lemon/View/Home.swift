@@ -11,19 +11,25 @@ struct Home: View {
     
     var persistence = PersistenceController.shared
     
+    @State var selection = 0
+    
     var body: some View {
-        TabView {
-            Menu()
+        TabView(selection: $selection) {
+            Menu(selection: $selection)
                 .environment(\.managedObjectContext, persistence.container.viewContext)
                 .tabItem {
-                Label("Menu", systemImage: "list.dash")
-            }
-            UserProfile()
+                    Label("Menu", systemImage: "list.dash")
+                }
+                .tag(0)
+            
+            UserProfile(selection: $selection)
                 .tabItem {
-                Label("Profile", systemImage: "square.and.pencil")
-            }
+                    Label("Profile", systemImage: "square.and.pencil")
+                }
+                .tag(1)
         }
         .navigationBarBackButtonHidden(true)
+        .ignoresSafeArea()
     }
 }
 

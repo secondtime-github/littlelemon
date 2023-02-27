@@ -7,12 +7,6 @@
 
 import SwiftUI
 
-let kFirstName = "first name key"
-let kLastName = "last name key"
-let kEmail = "email key"
-
-let kIsLoggedIn = "kIsLoggedIn"
-
 struct Onboarding: View {
     @State var firstName = ""
     @State var lastName = ""
@@ -21,28 +15,59 @@ struct Onboarding: View {
     @State var isLoggedIn = false
     
     var body: some View {
-        NavigationView {
-            VStack {
-                NavigationLink(destination: Home(), isActive: $isLoggedIn) {
-                    EmptyView()
-                }
+        NavigationStack {
+            ScrollView {
+                //                NavigationLink(destination: Home(), isActive: $isLoggedIn) {
+                //                    EmptyView()
+                //                }
                 
-                TextField("First Name", text: $firstName)
-                TextField("Last Name", text: $lastName)
-                TextField("Email", text: $email)
+                Image("Logo")
                 
-                Button("Register") {
-                    if !firstName.isEmpty && !lastName.isEmpty
-                        && isValid(email: email) {
-                        UserDefaults.standard.set(firstName, forKey: kFirstName)
-                        UserDefaults.standard.set(lastName, forKey: kLastName)
-                        UserDefaults.standard.set(email, forKey: kEmail)
-                        
-                        UserDefaults.standard.set(true, forKey: kIsLoggedIn)
-                        
-                        isLoggedIn = true
+                Hero()
+                
+                VStack {
+                    TextField("First Name", text: $firstName)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(.gray, lineWidth: 1)
+                        )
+                    TextField("Last Name", text: $lastName)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(.gray, lineWidth: 1)
+                        )
+                    TextField("Email", text: $email)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(.gray, lineWidth: 1)
+                        )
+                    
+                    Button(action: {
+                        if !firstName.isEmpty && !lastName.isEmpty && isValid(email: email) {
+                            UserDefaults.standard.set(firstName, forKey: kFirstName)
+                            UserDefaults.standard.set(lastName, forKey: kLastName)
+                            UserDefaults.standard.set(email, forKey: kEmail)
+                            
+                            UserDefaults.standard.set(true, forKey: kIsLoggedIn)
+                            
+                            isLoggedIn = true
+                        }
+                    }) {
+                        Text("Register")
+                            .foregroundColor(.black)
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(primaryColor2))
+                    }
+                    .navigationDestination(isPresented: $isLoggedIn) {
+                        Home()
                     }
                 }
+                .padding()
             }
             .onAppear {
                 if UserDefaults.standard.bool(forKey: kIsLoggedIn) {
@@ -50,7 +75,6 @@ struct Onboarding: View {
                 }
             }
         }
-        .padding()
     }
     
     func isValid(email:String) -> Bool {

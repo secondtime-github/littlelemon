@@ -13,31 +13,78 @@ struct Menu: View {
     
     @State var searchText = ""
     
+    @Binding var selection: Int
+    
     var body: some View {
         VStack {
-            Text("Little Lemon")
-            Text("Chicago")
-            Text("Little Lemon")
+            // Navigation Bar
+            HStack {
+                Color(.black)
+                    .opacity(0)
+                    .frame(width: 50, height: 50)
+                Spacer()
+                Image("Logo")
+                Spacer()
+                ProfileIcon().onTapGesture { selection = 1 }
+            }
+            .padding(.horizontal)
             
-            TextField("Search menu", text: $searchText)
-            FetchedObjects(
-                predicate: buildPredicate(),
-                sortDescriptors: buildSortDescriptors()
-            ) { (dishes: [Dish]) in
-                List {
-                    ForEach(dishes) { dish in
-                        HStack {
-                            NavigationLink(destination: Text(dish.dishDescription ?? "")) {
-                                Text("\(dish.title ?? "") : \(dish.price ?? "")")
-                            }
-                            AsyncImage(url: URL(string: dish.image ?? "")) { image in
-                                image.resizable()
-                            } placeholder: {
-                                ProgressView()
-                            }
-                            .frame(width: 50, height: 50)
+            ScrollView {
+                
+                // Hero Section
+                VStack(spacing: 0) {
+                    Hero()
+                    // Search
+                    TextField(text: $searchText) {
+                        Text(Image(systemName: "magnifyingglass"))
+                            .foregroundColor(.black)
+                    }
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(.white)
+                    )
+                    .padding(.horizontal)
+                    .padding(.bottom)
+                    .background(primaryColor1)
+                }
+                
+                // Menu Breakdown
+                HStack {
+                    Text("ORDER FOR DELIVERY!")
+                        .font(.system(size: 18, weight: .heavy))
+                    Spacer()
+                }
+                .padding(.leading)
+                .padding(.top)
+                
+                HStack {
+                    ForEach(Category.allCases, id: \.self) { category in
+                        Button(action: {}) {
+                            Text(category.rawValue)
+                                .font(.system(size: 16, weight: .heavy))
+                                .foregroundColor(primaryColor1)
+                                .padding(8)
+                                .background(.gray.opacity(0.2))
+                                .cornerRadius(16)
+                                .padding(8)
                         }
                     }
+                }
+                Divider()
+                
+                // Menu Items
+                FetchedObjects(
+                    predicate: buildPredicate(),
+                    sortDescriptors: buildSortDescriptors()
+                ) { (dishes: [Dish]) in
+                    //List {
+                    ForEach(dishes, id: \.self) { dish in
+                        NavigationLink(destination: ItemDetail(dish: dish)) {
+                            FoodMenuItem(dish: dish)
+                        }
+                    }
+                    //}
                 }
             }
         }
@@ -58,15 +105,15 @@ struct Menu: View {
                 let fullMenu = try? decoder.decode(MenuList.self, from: data)
                 if let menuItems = fullMenu?.menu {
                     for menuItem in menuItems {
-//                        guard let _ = exists(name: menuItem.title, context) else {
-//                            continue
-//                        }
+                        //                        guard let _ = PersistenceController.shared.exists(title: menuItem.title) else {
+                        //                            continue
+                        //                        }
                         
                         let dish = Dish(context: viewContext)
                         dish.title = menuItem.title
                         dish.image = menuItem.image
                         dish.price = menuItem.price
-
+                        
                         dish.dishDescription = menuItem.description
                         dish.category = menuItem.category
                     }
@@ -81,9 +128,9 @@ struct Menu: View {
     func buildSortDescriptors() -> [NSSortDescriptor] {
         return [
             NSSortDescriptor(
-            key: "title",
-            ascending: true,
-            selector: #selector(NSString.localizedStandardCompare))
+                key: "title",
+                ascending: true,
+                selector: #selector(NSString.localizedStandardCompare))
         ]
     }
     
@@ -97,6 +144,6 @@ struct Menu: View {
 
 struct Menu_Previews: PreviewProvider {
     static var previews: some View {
-        Menu()
+        Menu(selection: .constant(0))
     }
 }
