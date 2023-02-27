@@ -17,11 +17,14 @@ struct ItemDetail: View {
                 .foregroundColor(.black)
             
             AsyncImage(url: URL(string: dish.image ?? "")) { image in
-                image.resizable()
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
             } placeholder: {
                 ProgressView()
             }
             .frame(width: 300, height: 300)
+            .cornerRadius(8)
             
             HStack {
                 Text("$" + (dish.price ?? ""))

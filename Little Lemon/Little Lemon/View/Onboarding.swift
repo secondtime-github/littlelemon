@@ -69,6 +69,7 @@ struct Onboarding: View {
                 }
                 .padding()
             }
+            .scrollDismissesKeyboard(.immediately)
             .onAppear {
                 if UserDefaults.standard.bool(forKey: kIsLoggedIn) {
                     isLoggedIn = true
