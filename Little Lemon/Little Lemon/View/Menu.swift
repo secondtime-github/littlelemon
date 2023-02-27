@@ -13,6 +13,8 @@ struct Menu: View {
     
     @State var searchText = ""
     
+    @State var categories: Set<Category> = [.starter, .main, .dessert, .drink]
+    
     @Binding var selection: Int
     
     var body: some View {
@@ -60,12 +62,24 @@ struct Menu: View {
                 
                 HStack {
                     ForEach(Category.allCases, id: \.self) { category in
-                        Button(action: {}) {
+                        Button(action: {
+                            if categories.contains(category) {
+                                categories.remove(category)
+                            } else {
+                                categories.insert(category)
+                            }
+                        }) {
                             Text(category.rawValue)
                                 .font(.system(size: 16, weight: .heavy))
-                                .foregroundColor(primaryColor1)
+                                .foregroundColor(
+                                    categories.contains(category)
+                                    ? .white
+                                    : primaryColor1)
                                 .padding(8)
-                                .background(.gray.opacity(0.2))
+                                .background(
+                                    categories.contains(category)
+                                    ? primaryColor1
+                                    : .gray.opacity(0.2))
                                 .cornerRadius(16)
                                 .padding(8)
                         }
@@ -135,10 +149,16 @@ struct Menu: View {
     }
     
     func buildPredicate() -> NSPredicate {
-        if searchText.isEmpty {
-            return NSPredicate(value: true)
-        }
-        return NSPredicate(format: "title CONTAINS[cd] %@", searchText)
+        // category
+        let status = categories.map({ $0.rawValue.lowercased() })
+        let categoryPredicate = NSPredicate(format: "category IN[cd] %@", status)
+        
+        // search bar
+        let searchPredicate = searchText.isEmpty
+        ? NSPredicate(value: true)
+        : NSPredicate(format: "title CONTAINS[cd] %@", searchText)
+
+        return NSCompoundPredicate(type: .and, subpredicates: [categoryPredicate, searchPredicate])
     }
 }
 
