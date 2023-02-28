@@ -6,14 +6,19 @@
 //
 
 import SwiftUI
+import CoreData
 
 struct Menu: View {
     
     @Environment(\.managedObjectContext) private var viewContext
     
     @State var searchText = ""
-    
-    @State var categories: Set<Category> = [.starter, .main, .dessert, .drink]
+    @State var categories: Set<Category> = [
+        .starter,
+        .main,
+        .dessert,
+        .drink
+    ]
     
     @Binding var selection: Int
     
@@ -46,8 +51,7 @@ struct Menu: View {
                         RoundedRectangle(cornerRadius: 8)
                             .fill(.white)
                     )
-                    .padding(.horizontal)
-                    .padding(.bottom)
+                    .padding([.horizontal, .bottom])
                     .background(primaryColor1)
                 }
                 
@@ -57,8 +61,7 @@ struct Menu: View {
                         .font(.system(size: 18, weight: .heavy))
                     Spacer()
                 }
-                .padding(.leading)
-                .padding(.top)
+                .padding([.leading, .top])
                 
                 HStack {
                     ForEach(Category.allCases, id: \.self) { category in
@@ -92,51 +95,52 @@ struct Menu: View {
                     predicate: buildPredicate(),
                     sortDescriptors: buildSortDescriptors()
                 ) { (dishes: [Dish]) in
-                    //List {
                     ForEach(dishes, id: \.self) { dish in
                         NavigationLink(destination: ItemDetail(dish: dish)) {
                             FoodMenuItem(dish: dish)
                         }
                     }
-                    //}
                 }
             }
         }
         .onAppear {
-            getMenuData()
+            fetchDataFromServer(parseDate)
         }
     }
     
-    func getMenuData() {
-        PersistenceController.shared.clear()
-        
-        let urlStr = "https://raw.githubusercontent.com/Meta-Mobile-Developer-PC/Working-With-Data-API/main/menu.json"
-        let url = URL(string: urlStr)!
-        let urlRequest = URLRequest(url: url)
-        let task = URLSession.shared.dataTask(with: urlRequest) { data, _, _ in
-            if let data = data {
-                let decoder = JSONDecoder()
-                let fullMenu = try? decoder.decode(MenuList.self, from: data)
-                if let menuItems = fullMenu?.menu {
-                    for menuItem in menuItems {
-                        //                        guard let _ = PersistenceController.shared.exists(title: menuItem.title) else {
-                        //                            continue
-                        //                        }
-                        
-                        let dish = Dish(context: viewContext)
-                        dish.title = menuItem.title
-                        dish.image = menuItem.image
-                        dish.price = menuItem.price
-                        
-                        dish.dishDescription = menuItem.description
-                        dish.category = menuItem.category
-                    }
-                    try? viewContext.save()
-                }
+    func parseDate(data: Data) {
+        do {
+            let responseData = try JSONDecoder().decode(MenuList.self, from: data)
+            let menuItems = responseData.menu
+            
+            for menu in menuItems {
+                insertDataIfNeeded(menu: menu)
             }
+            
+        } catch {
+            print("Error decoding JSON: \(error.localizedDescription)")
         }
+    }
+    
+    func insertDataIfNeeded(menu: MenuItem) {
+        let fetchRequest = NSFetchRequest<Dish>(entityName: "Dish")
+        fetchRequest.predicate = NSPredicate(format: "title == %@", menu.title)
+        let results = try? viewContext.fetch(fetchRequest)
         
-        task.resume()
+        if let _ = results?.first {
+            // data already exists, do nothing
+        } else {
+            // insert data
+            let dish = Dish(context: viewContext)
+            dish.title = menu.title
+            dish.image = menu.image
+            dish.price = menu.price
+            
+            dish.dishDescription = menu.description
+            dish.category = menu.category
+            
+            try? viewContext.save()
+        }
     }
     
     func buildSortDescriptors() -> [NSSortDescriptor] {
@@ -164,6 +168,8 @@ struct Menu: View {
 
 struct Menu_Previews: PreviewProvider {
     static var previews: some View {
-        Menu(selection: .constant(0))
+        Menu(selection: .constant(0)).environment(
+            \.managedObjectContext,
+             PersistenceController.shared.container.viewContext)
     }
 }

@@ -43,6 +43,17 @@ struct FoodMenuItem: View {
 
 struct FoodMenuItem_Previews: PreviewProvider {
     static var previews: some View {
-        FoodMenuItem(dish: Dish())
+        let viewContext = PersistenceController.shared.container.viewContext
+        
+        let dish = Dish(context: viewContext)
+        dish.title = "Greek Salad"
+        dish.image = "https://github.com/Meta-Mobile-Developer-PC/Working-With-Data-API/blob/main/images/greekSalad.jpg?raw=true"
+        dish.price = "10"
+        
+        dish.dishDescription = "The famous greek salad of crispy lettuce, peppers, olives, our Chicago."
+        dish.category = "starters"
+        
+        return FoodMenuItem(dish: dish).environment(
+            \.managedObjectContext, viewContext)
     }
 }
