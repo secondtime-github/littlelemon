@@ -17,9 +17,6 @@ struct Onboarding: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                //                NavigationLink(destination: Home(), isActive: $isLoggedIn) {
-                //                    EmptyView()
-                //                }
                 
                 Image("Logo")
                 

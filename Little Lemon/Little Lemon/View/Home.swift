@@ -16,7 +16,9 @@ struct Home: View {
     var body: some View {
         TabView(selection: $selection) {
             Menu(selection: $selection)
-                .environment(\.managedObjectContext, persistence.container.viewContext)
+                .environment(
+                    \.managedObjectContext,
+                     persistence.container.viewContext)
                 .tabItem {
                     Label("Menu", systemImage: "list.dash")
                 }

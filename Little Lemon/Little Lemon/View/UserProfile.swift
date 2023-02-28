@@ -91,16 +91,18 @@ struct UserProfile: View {
                             RoundedRectangle(cornerRadius: 16)
                                 .stroke(.gray, lineWidth: 1)
                         )
-                }.padding()
+                }
+                .padding()
+                
                 // Email notifications
                 VStack(alignment: .leading) {
                     Text("Email notifications")
                         .font(.system(size: 18, weight: .bold))
                     
-                    checkItem(item: "Order statuses", checked: $orderStatuses)
-                    checkItem(item: "Password changes", checked: $passwordChanges)
-                    checkItem(item: "Special offers", checked: $specialOffer)
-                    checkItem(item: "Newsletter", checked: $newsletter)
+                    CheckBox(item: "Order statuses", checked: $orderStatuses)
+                    CheckBox(item: "Password changes", checked: $passwordChanges)
+                    CheckBox(item: "Special offers", checked: $specialOffer)
+                    CheckBox(item: "Newsletter", checked: $newsletter)
                     
                     Button(action: {
                         UserDefaults.standard.set(false, forKey: "kIsLoggedIn")
@@ -176,24 +178,5 @@ struct UserProfile_Previews: PreviewProvider {
         UserDefaults.standard.set("email", forKey: kEmail)
         
         return UserProfile(selection: .constant(1))
-    }
-}
-
-struct checkItem: View {
-    let item: String
-    @Binding var checked: Bool
-    
-    var body: some View {
-        Button(action: {
-            checked.toggle()
-        }) {
-            HStack {
-                Image(systemName: checked ? "checkmark.square.fill" : "square")
-                    .font(.system(size: 32))
-                    .foregroundColor(primaryColor1)
-                Text(item)
-            }.padding(.vertical, 5)
-        }
-        .buttonStyle(.plain)
     }
 }
